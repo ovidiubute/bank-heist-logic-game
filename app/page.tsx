@@ -105,6 +105,19 @@ const initialMarks = Object.fromEntries(
 function getRow(cell: number) { return Math.floor(cell / 6); }
 function getCol(cell: number) { return cell % 6; }
 
+function getWallClasses(cell: number) {
+  const row = getRow(cell);
+  const col = getCol(cell);
+  const room = roomByCell[cell];
+  const classes: string[] = [];
+
+  if (row === 0 || roomByCell[cell - 6] !== room) classes.push('wall-top');
+  if (col === 0 || roomByCell[cell - 1] !== room) classes.push('wall-left');
+  if (row === 5) classes.push('wall-bottom');
+  if (col === 5) classes.push('wall-right');
+  return classes.join(' ');
+}
+
 type ModelContext = {
   registerTool: (tool: {
     name: string;
@@ -326,11 +339,10 @@ export default function Home() {
             </div>
           </div>
 
+          <p className="wall-guide" id="wall-guide"><b>Thick lines are walls.</b> Place people inside floor squares; a person “beside a wall” occupies a square touching one.</p>
+
           <div className="map-frame">
-            <div className="bank-grid">
-              {Object.keys(roomNames).map((room) => (
-                <span key={room} className={`room-art art-${room}`} aria-hidden="true" />
-              ))}
+            <div className="bank-grid" aria-describedby="wall-guide">
               {roomByCell.map((room, cell) => {
                 const occupantId = occupantByCell[cell];
                 const occupant = suspects.find((suspect) => suspect.id === occupantId);
@@ -339,7 +351,7 @@ export default function Home() {
                   <button
                     type="button"
                     key={cell}
-                    className={`map-cell room-${room} ${occupant ? 'occupied' : ''}`}
+                    className={`map-cell room-${room} ${getWallClasses(cell)} ${occupant ? 'occupied' : ''}`}
                     onClick={() => placeOnCell(cell)}
                     aria-label={`${roomNames[room]}, row ${getRow(cell) + 1}, column ${getCol(cell) + 1}${occupant ? `, occupied by ${occupant.name}` : ''}`}
                   >
@@ -427,6 +439,7 @@ export default function Home() {
             <li><b>Place suspects.</b> Select a dossier card, then choose a map square. One person fits in each square.</li>
             <li><b>Mark identities.</b> Cycle Unknown → Outlaw → Cleared on each card. Cooper and Vito are already cleared.</li>
             <li><b>Read spatial clues.</b> “Beside” means directly north, south, east, or west. “North of” can be anywhere in a higher row.</li>
+            <li><b>Read walls.</b> Thick lines separate rooms. A person beside a wall goes in a floor square touching that line—never on top of it.</li>
             <li><b>Read room clues.</b> “Alone” means the only person in a room. “Alone with” means exactly two people occupy that room.</li>
             <li><b>Close the case.</b> Place everyone, identify all three outlaws, then accuse Vito’s room-mate.</li>
           </ol>
