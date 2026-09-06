@@ -76,16 +76,16 @@ const roomLabels: Record<number, string> = {
 };
 
 const objects: Record<number, { sprite: string; label: string }> = {
-  24: { sprite: 'horse', label: 'horse' },
+  32: { sprite: 'horse', label: 'horse' },
   3: { sprite: 'table', label: 'table' },
-  28: { sprite: 'sack', label: 'sack' },
-  18: { sprite: 'safe', label: 'safe' },
+  18: { sprite: 'sack', label: 'sack' },
+  12: { sprite: 'safe', label: 'safe' },
   26: { sprite: 'cactus', label: 'cactus' },
 };
 
 const solution: Record<SuspectId, number> = {
-  andy: 25, betty: 2, cooper: 16, dave: 29, elliot: 35,
-  francesca: 15, gabriella: 7, hank: 5, vito: 24,
+  andy: 27, betty: 4, cooper: 17, dave: 19, elliot: 30,
+  francesca: 15, gabriella: 7, hank: 2, vito: 32,
 };
 
 const outlawIds = new Set<SuspectId>(['andy', 'betty', 'dave']);
@@ -93,7 +93,7 @@ const outlawIds = new Set<SuspectId>(['andy', 'betty', 'dave']);
 const hints = [
   "Start with Hank: only four cells are both in the Director's Office and in the top row.",
   'Elliot must occupy one of the four outer corners. Gabriella cannot be on the outer edge.',
-  'Vito shares the Safe Room with exactly one person. That person is the murderer.',
+  'Vito shares a room with exactly one person. That person is the murderer.',
   'Betty is one column east of Andy. Combine that with the table and horse positions.',
   'The three outlaws are Andy, Betty, and Dave. Now use Francesca and the room-pair rule to finish the board.',
 ];
@@ -343,6 +343,9 @@ export default function Home() {
 
           <div className="map-frame">
             <div className="bank-grid" aria-describedby="wall-guide">
+              {Object.keys(roomNames).map((room) => (
+                <span key={room} className={`room-art art-${room}`} aria-hidden="true" />
+              ))}
               {roomByCell.map((room, cell) => {
                 const occupantId = occupantByCell[cell];
                 const occupant = suspects.find((suspect) => suspect.id === occupantId);
@@ -454,13 +457,13 @@ export default function Home() {
             <DialogTitle>{result === 'win' ? 'Case closed' : result === 'wrong' ? 'Wrong suspect' : 'The evidence is not ready'}</DialogTitle>
             <DialogDescription>
               {result === 'win'
-                ? 'Andy was alone with Vito in the Safe Room. The other outlaws were Betty and Dave.'
+                ? 'Andy was alone with Vito Outside. The other outlaws were Betty and Dave.'
                 : result === 'wrong'
                   ? 'That suspect was not alone with Vito. Recheck the room pairs.'
                   : 'All nine positions and identities must be correct before the sheriff accepts an accusation.'}
             </DialogDescription>
           </DialogHeader>
-          {result === 'win' && <div className="solution-strip"><span><b>Vito</b> + <b>Andy</b></span><i>Safe Room</i><strong>Andy is the murderer</strong></div>}
+          {result === 'win' && <div className="solution-strip"><span><b>Vito</b> + <b>Andy</b></span><i>Outside</i><strong>Andy is the murderer</strong></div>}
           <DialogFooter>
             {result === 'win' && <Button onClick={resetGame}><RotateCcw /> Play again</Button>}
             <Button variant="outline" onClick={() => setAccuseOpen(false)}>Return to evidence</Button>
