@@ -11,7 +11,6 @@ import {
   Search,
   Shield,
   Skull,
-  UserRound,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -76,11 +75,12 @@ const roomLabels: Record<number, string> = {
   14: 'Lobby', 26: 'Outside', 29: 'Porch',
 };
 
-const objects: Record<number, { symbol: string; label: string }> = {
-  24: { symbol: '♞', label: 'horse' },
-  3: { symbol: '▤', label: 'table' },
-  28: { symbol: '◈', label: 'sack' },
-  18: { symbol: '▣', label: 'safe' },
+const objects: Record<number, { sprite: string; label: string }> = {
+  24: { sprite: 'horse', label: 'horse' },
+  3: { sprite: 'table', label: 'table' },
+  28: { sprite: 'sack', label: 'sack' },
+  18: { sprite: 'safe', label: 'safe' },
+  26: { sprite: 'cactus', label: 'cactus' },
 };
 
 const solution: Record<SuspectId, number> = {
@@ -319,11 +319,18 @@ export default function Home() {
         <section className="map-panel" aria-label="Bank map">
           <div className="panel-heading">
             <div><span className="eyebrow">Crime scene</span><h2>Last known positions</h2></div>
-            <div className="map-legend"><span><b>♞</b> Horse</span><span><b>▤</b> Table</span><span><b>◈</b> Sack</span></div>
+            <div className="map-legend">
+              <span><b className="legend-prop prop-horse" /> Horse</span>
+              <span><b className="legend-prop prop-table" /> Table</span>
+              <span><b className="legend-prop prop-sack" /> Sack</span>
+            </div>
           </div>
 
           <div className="map-frame">
             <div className="bank-grid">
+              {Object.keys(roomNames).map((room) => (
+                <span key={room} className={`room-art art-${room}`} aria-hidden="true" />
+              ))}
               {roomByCell.map((room, cell) => {
                 const occupantId = occupantByCell[cell];
                 const occupant = suspects.find((suspect) => suspect.id === occupantId);
@@ -337,10 +344,10 @@ export default function Home() {
                     aria-label={`${roomNames[room]}, row ${getRow(cell) + 1}, column ${getCol(cell) + 1}${occupant ? `, occupied by ${occupant.name}` : ''}`}
                   >
                     {roomLabels[cell] && <span className="room-label">{roomLabels[cell]}</span>}
-                    {object && <span className="map-object" title={object.label}>{object.symbol}</span>}
+                    {object && <span className={`map-object prop-${object.sprite}`} title={object.label} />}
                     {occupant && (
                       <span className={`map-token tone-${occupant.tone} ${selected === occupant.id ? 'selected' : ''}`}>
-                        <span>{occupant.initials}</span><small>{occupant.name}</small>
+                        <span className={`token-sprite sprite-${occupant.id}`} /><small>{occupant.name}</small>
                         {marks[occupant.id] === 'outlaw' && <Skull aria-label="Marked outlaw" />}
                       </span>
                     )}
@@ -376,7 +383,7 @@ export default function Home() {
               return (
                 <article key={suspect.id} className={`suspect-card ${selected === suspect.id ? 'active' : ''} ${suspect.victim ? 'victim' : ''}`}>
                   <button className="suspect-main" type="button" onClick={() => chooseSuspect(suspect.id)}>
-                    <span className={`portrait tone-${suspect.tone}`}><UserRound /></span>
+                    <span className={`portrait portrait-sprite sprite-${suspect.id}`} aria-hidden="true" />
                     <span className="suspect-copy">
                       <strong>{suspect.name}{suspect.victim && <em>Victim</em>}</strong>
                       <small>{suspect.clue}</small>
